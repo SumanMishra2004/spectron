@@ -1,3 +1,4 @@
+
 import { Suspense } from 'react';
 import { getDashboardStats, getRecentActivity, getUserProperties } from '@/actions/dashboard';
 import { getCurrentUser } from '@/lib/auth';
@@ -405,3 +406,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+

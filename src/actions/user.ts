@@ -60,6 +60,12 @@ export async function getUserProfile() {
         image: true,
         avatar: true,
         isVerified: true,
+        createdAt: true,
+        updatedAt: true,
+        emailVerified: true,
+        address: true,
+        latitude: true,
+        longitude: true,
       },
     });
 
