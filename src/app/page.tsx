@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { PropertyCard } from '@/components/property-card';
+
 import { getProperties } from '@/actions/properties';
 import { 
   Search, 
@@ -14,7 +14,6 @@ import {
   Star,
   ArrowRight,
   Sparkles,
-  Clock,
   HeartHandshake,
   BadgeCheck,
   ChevronRight,
@@ -27,6 +26,7 @@ import { Navbar } from '@/components/navbar';
 import { getCurrentUser } from '@/lib/auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PropertyCard } from '@/components/property-card';
 
 // Make this page dynamic to avoid database calls during build
 export const dynamic = 'force-dynamic';

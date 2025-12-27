@@ -1,7 +1,5 @@
 import { Suspense } from 'react';
-import { PropertyCard } from '@/components/property-card';
-import { PropertyFilters } from '@/components/property-filters';
-import { PropertiesPageSkeleton } from '@/components/properties-skeleton';
+
 import { getProperties } from '@/actions/properties';
 import { getCurrentUser } from '@/lib/auth';
 import { Navbar } from '@/components/navbar';
@@ -19,6 +17,9 @@ import {
   List
 } from 'lucide-react';
 import Link from 'next/link';
+import { PropertyFilters } from '@/components/property-filters';
+import { PropertiesPageSkeleton } from '@/components/properties-skeleton';
+import { PropertyCard } from '@/components/property-card';
 
 export const dynamic = 'force-dynamic';
 
