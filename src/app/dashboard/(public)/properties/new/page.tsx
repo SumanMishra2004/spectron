@@ -369,8 +369,8 @@ const PropertyListingForm = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <Card className="w-full max-w-2xl shadow-lg">
+      <div className="min-h-screen p-4 flex items-center justify-center">
+        <Card className="w-full shadow-lg">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
               <div className="flex justify-center">
@@ -414,7 +414,7 @@ const PropertyListingForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen  p-4">
       <div className="w-full mx-auto py-8">
         {/* Progress Steps */}
         <div className="mb-8">

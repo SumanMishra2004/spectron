@@ -24,7 +24,6 @@ model User {
   location      Unsupported("geography")?
   longitude     Float?
   accounts      Account[]
-  leads         Lead[]
   properties    Property[]
   sessions      Session[]
   subscriptions Subscription[]
@@ -82,15 +81,14 @@ model Property {
   latitude      Float
   longitude     Float
   location      Unsupported("geography")
-  status        PropertyStatus           @default(PENDING)
-  isFeatured    Boolean                  @default(false)
-  featuredUntil DateTime?
+  status        PropertyStatus           @default(ACTIVE)
   userId        String
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
-  leads         Lead[]
   user          User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   images        PropertyImage[]
+  urbanSprawlData UrbanSprawlData[]
+
 
   @@index([userId])
   @@index([status])
@@ -109,21 +107,6 @@ model PropertyImage {
   @@index([propertyId])
 }
 
-model Lead {
-  id         String   @id @default(cuid())
-  name       String
-  email      String
-  phone      String
-  message    String?
-  propertyId String
-  userId     String?
-  createdAt  DateTime @default(now())
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  user       User?    @relation(fields: [userId], references: [id])
-
-  @@index([propertyId])
-  @@index([userId])
-}
 
 model Subscription {
   id                   String   @id @default(cuid())
@@ -143,6 +126,20 @@ model Subscription {
   @@index([status])
 }
 
+
+model UrbanSprawlData {
+  id          String   @id @default(cuid())
+  propertyId  String
+  year        Int
+  urbanSqKm   Float    @map("urban_sq_km")
+  percentage  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("urban_sprawl_data")
+}
 enum UserRole {
   PUBLIC
   OWNER

@@ -5,13 +5,21 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import { getCurrentUser } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect('/api/auth/signin');
+  }
+
   return (
     <SidebarProvider
       style={
@@ -23,7 +31,7 @@ export default function DashboardLayout({
       }
       className="dark"
     >
-      <AppSidebar variant="inset" className="rounded-md" />
+      <AppSidebar variant="inset" className="rounded-md" user={user} />
       <SidebarInset className="bg-sidebar-primary">
         <SiteHeader />
         <div className="flex flex-1 flex-col ">

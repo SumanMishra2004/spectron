@@ -20,9 +20,19 @@ import { getSidebarLinksByRole } from "@/types/dashboardSidebarLinks"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useUserRole } from "@/hooks/use-user-role"
+import { SidebarUserHeader } from "@/components/dashboard/sidebar/sidebar-user-header"
 
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: {
+    id: string;
+    email: string | null;
+    name: string | null;
+    image: string | null;
+    role: string;
+  };
+}
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const pathname = usePathname();
   const userRole = useUserRole();
   const sections = getSidebarLinksByRole(userRole);
@@ -30,19 +40,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="rouded-xl bg-[#f8d364]" collapsible="icon" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        
+        
+        {/* User Header */}
+        <SidebarUserHeader user={user} />
       </SidebarHeader>
       <SidebarContent style={{
         scrollbarWidth: 'thin',

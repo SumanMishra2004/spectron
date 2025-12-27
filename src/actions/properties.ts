@@ -66,13 +66,7 @@ export async function getProperties(
       where.userId = filters.userId;
     }
 
-    // Featured filter
-    if (filters?.isFeatured !== undefined) {
-      where.isFeatured = filters.isFeatured;
-      if (filters.isFeatured) {
-        where.featuredUntil = { gte: new Date() };
-      }
-    }
+   
 
     // Price filter
     if (filters?.minPrice || filters?.maxPrice) {
@@ -283,6 +277,9 @@ export async function getPropertyById(id: string) {
             avatar: true,
           },
         },
+        urbanSprawlData: {
+          orderBy: { year: 'asc' },
+        },
       },
     });
 
@@ -369,6 +366,12 @@ export async function createProperty(data: {
       },
     });
 
+    // Fetch urban sprawl data asynchronously (don't wait for it)
+    fetchAndStoreUrbanSprawlData(propertyId, data.latitude, data.longitude).catch((error) => {
+      console.error('Error fetching urban sprawl data:', error);
+      // Don't fail the property creation if urban sprawl data fetch fails
+    });
+
     revalidatePath('/');
     revalidatePath('/properties');
     revalidatePath('/dashboard/properties');
@@ -377,6 +380,58 @@ export async function createProperty(data: {
   } catch (error) {
     console.error('Error creating property:', error);
     return { success: false, error: 'Failed to create property' };
+  }
+}
+
+// Fetch and store urban sprawl data for a property
+async function fetchAndStoreUrbanSprawlData(
+  propertyId: string,
+  latitude: number,
+  longitude: number
+) {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_URBAN_SPRAWL_API_KEY;
+    
+    if (!apiUrl) {
+      console.warn('NEXT_PUBLIC_URBAN_SPRAWL_API_KEY not configured');
+      return;
+    }
+
+    console.log('Fetching urban sprawl data for property:', propertyId);
+
+    const response = await fetch(`${apiUrl}?lat=${latitude}&lon=${longitude}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Urban sprawl API error: ${response.status}`);
+    }
+
+    const data: Array<{
+      year: number;
+      urban_sq_km: number;
+      percentage: number;
+    }> = await response.json();
+
+    console.log('Urban sprawl data received:', data.length, 'records');
+
+    // Store the data in the database
+    await prisma.urbanSprawlData.createMany({
+      data: data.map((item) => ({
+        propertyId,
+        year: item.year,
+        urbanSqKm: item.urban_sq_km,
+        percentage: item.percentage,
+      })),
+    });
+
+    console.log('Urban sprawl data stored successfully for property:', propertyId);
+  } catch (error) {
+    console.error('Error in fetchAndStoreUrbanSprawlData:', error);
+    throw error;
   }
 }
 
@@ -432,7 +487,7 @@ export async function uploadPropertyImages(formData: FormData) {
       console.log('Uploading file:', { fileName, fileSize: file.size, fileType: file.type });
 
       const { data, error } = await storage.storage
-        .from('property-images')
+        .from('properties_images')
         .upload(filePath, buffer, {
           contentType: file.type,
           cacheControl: '3600',
@@ -450,7 +505,7 @@ export async function uploadPropertyImages(formData: FormData) {
       console.log('Upload successful:', data);
 
       const { data: { publicUrl } } = storage.storage
-        .from('property-images')
+        .from('properties_images')
         .getPublicUrl(filePath);
 
       console.log('Public URL:', publicUrl);
@@ -520,10 +575,8 @@ export async function getFeaturedProperties(limit: number = 6) {
     const properties = await prisma.property.findMany({
       where: {
         status: 'ACTIVE',
-        isFeatured: true,
-        featuredUntil: {
-          gte: new Date(),
-        },
+       
+       
       },
       include: {
         images: {
@@ -537,7 +590,7 @@ export async function getFeaturedProperties(limit: number = 6) {
           },
         },
       },
-      orderBy: { featuredUntil: 'desc' },
+      orderBy: { createdAt: 'desc' },
       take: Math.min(limit, 20),
     });
 
@@ -557,18 +610,12 @@ export async function getPropertyStats(userId?: string) {
       return { success: false, error: 'Unauthorized' };
     }
 
-    const [total, active, pending, sold, totalLeads] = await Promise.all([
+    const [total, active, pending, sold] = await Promise.all([
       prisma.property.count({ where: { userId: targetUserId } }),
       prisma.property.count({ where: { userId: targetUserId, status: 'ACTIVE' } }),
       prisma.property.count({ where: { userId: targetUserId, status: 'PENDING' } }),
       prisma.property.count({ where: { userId: targetUserId, status: 'SOLD' } }),
-      prisma.lead.count({
-        where: {
-          property: {
-            userId: targetUserId,
-          },
-        },
-      }),
+     
     ]);
 
     return {
@@ -578,7 +625,6 @@ export async function getPropertyStats(userId?: string) {
         active,
         pending,
         sold,
-        totalLeads,
       },
     };
   } catch (error) {
@@ -719,25 +765,5 @@ export async function deleteProperty(id: string) {
   } catch (error) {
     console.error('Error deleting property:', error);
     return { success: false, error: 'Failed to delete property' };
-  }
-}
-
-export async function submitLead(data: {
-  name: string;
-  email: string;
-  phone: string;
-  message?: string;
-  propertyId: string;
-  userId?: string;
-}) {
-  try {
-    const lead = await prisma.lead.create({
-      data,
-    });
-
-    return lead;
-  } catch (error) {
-    console.error('Error submitting lead:', error);
-    throw new Error('Failed to submit lead');
   }
 }
