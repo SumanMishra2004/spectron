@@ -158,7 +158,7 @@ This project uses **Leaflet with OpenStreetMap** - completely free with no API k
 - Google sign-in only (no passwords!)
 - Post properties with images
 - Select exact location on map
-- Track leads in dashboard
+- Track anonymous feedback in dashboard
 
 ### For Brokers
 - Monthly subscription via Stripe

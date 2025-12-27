@@ -1,8 +1,8 @@
-import { User as PrismaUser, Property as PrismaProperty, PropertyImage, Lead, Subscription } from '@prisma/client';
+import { User as PrismaUser, Property as PrismaProperty, PropertyImage, Subscription } from '@prisma/client';
 
 export type User = PrismaUser;
 export type Property = PrismaProperty;
-export type { PropertyImage, Lead, Subscription };
+export type { PropertyImage, Subscription };
 
 export type PropertyWithImages = Property & {
   images: PropertyImage[];

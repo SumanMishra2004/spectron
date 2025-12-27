@@ -15,7 +15,9 @@ import {
   Settings,
   Wallet,
   FileText,
-  BarChart3
+  BarChart3,
+  Shield,
+  CheckCircle
 } from "lucide-react";
 import { JSX } from "react";
 
@@ -89,104 +91,153 @@ export const dashboardSidebarLinks: SidebarSection[] = [
         icon: <Map />,
         description: "Map-based property exploration",
         roles: ["PUBLIC", "OWNER", "BROKER"]
-      }
-    ]
-  },
-
-  // -----------------------------
-  // LEADS & ENGAGEMENT
-  // -----------------------------
-  {
-    label: "Leads & Engagement",
-    links: [
-      {
-        title: "Leads & Inquiries",
-        href: "/dashboard/leads",
-        icon: <Users />,
-        badge: "12",
-        roles: ["OWNER", "BROKER"]
-      },
-      {
-        title: "Community Reviews",
-        href: "/dashboard/reviews",
-        icon: <MessageSquare />,
-        roles: ["OWNER", "BROKER"]
       },
       {
         title: "Saved Properties",
-        href: "/dashboard/favorites",
+        href: "/dashboard/saved",
         icon: <Bookmark />,
-        roles: ["PUBLIC"]
-      }
-    ]
-  },
-
-  // -----------------------------
-  // ANALYTICS (HACKATHON WOW)
-  // -----------------------------
-  {
-    label: "Insights & Analytics",
-    links: [
-      {
-        title: "Listing Performance",
-        href: "/dashboard/analytics/listings",
-        icon: <BarChart3 />,
-        description: "Views, clicks & leads",
-        roles: ["BROKER"]
-      },
-      {
-        title: "Price Trends",
-        href: "/dashboard/analytics/prices",
-        icon: <TrendingUp />,
+        description: "Your favorite properties",
         roles: ["PUBLIC", "OWNER", "BROKER"]
       }
     ]
   },
 
   // -----------------------------
-  // PAYMENTS & TRUST
+  // BUSINESS TOOLS (BROKER)
   // -----------------------------
   {
-    label: "Payments & Trust",
+    label: "Business Tools",
     links: [
       {
-        title: "Wallet & Billing",
-        href: "/dashboard/billing",
-        icon: <Wallet />,
+        title: "Lead Management",
+        href: "/dashboard/leads",
+        icon: <Users />,
+        description: "Track and convert leads",
+        badge: "New",
+        variant: "primary",
         roles: ["BROKER"]
       },
       {
-        title: "Verification Status",
-        href: "/dashboard/verification",
-        icon: <ShieldCheck />,
+        title: "Client Portal",
+        href: "/dashboard/clients",
+        icon: <Users />,
+        description: "Manage client relationships",
+        roles: ["BROKER"]
+      },
+      {
+        title: "Inquiries",
+        href: "/dashboard/inquiries",
+        icon: <MessageSquare />,
+        description: "Property inquiries",
         roles: ["OWNER", "BROKER"]
+      },
+      {
+        title: "Analytics",
+        href: "/dashboard/analytics",
+        icon: <BarChart3 />,
+        description: "Performance insights",
+        roles: ["OWNER", "BROKER"]
+      },
+      {
+        title: "Billing & Payments",
+        href: "/dashboard/billing",
+        icon: <Wallet />,
+        description: "Manage payments",
+        roles: ["BROKER"]
       }
     ]
   },
 
   // -----------------------------
-  // NOTIFICATIONS & ACCOUNT
+  // PROPERTY VERIFICATION
+  // -----------------------------
+  {
+    label: "Community",
+    links: [
+      {
+        title: "Anonymous Opinions",
+        href: "/dashboard/opinions",
+        icon: <MessageSquare />,
+        description: "View neighborhood feedback",
+        roles: ["PUBLIC", "OWNER", "BROKER"]
+      },
+      {
+        title: "Property Validation",
+        href: "/dashboard/validation",
+        icon: <Shield />,
+        description: "Help verify nearby properties",
+        roles: ["PUBLIC", "OWNER", "BROKER"]
+      },
+      {
+        title: "Admin Verification",
+        href: "/dashboard/admin/verify",
+        icon: <CheckCircle />,
+        description: "Approve/reject properties",
+        roles: ["ADMIN"]
+      }
+    ]
+  },
+
+  // -----------------------------
+  // ACCOUNT & SETTINGS
   // -----------------------------
   {
     label: "Account",
     links: [
       {
-        title: "Notifications",
-        href: "/dashboard/notifications",
-        icon: <Bell />,
-        roles: ["PUBLIC", "OWNER", "BROKER"]
-      },
-      {
         title: "Profile",
         href: "/dashboard/profile",
         icon: <User />,
-        roles: ["PUBLIC", "OWNER", "BROKER"]
+        roles: ["PUBLIC", "OWNER", "BROKER", "ADMIN"]
+      },
+      {
+        title: "Notifications",
+        href: "/dashboard/notifications",
+        icon: <Bell />,
+        roles: ["PUBLIC", "OWNER", "BROKER", "ADMIN"]
       },
       {
         title: "Settings",
         href: "/dashboard/settings",
         icon: <Settings />,
-        roles: ["PUBLIC", "OWNER", "BROKER"]
+        roles: ["PUBLIC", "OWNER", "BROKER", "ADMIN"]
+      }
+    ]
+  },
+
+  // -----------------------------
+  // ADMIN TOOLS
+  // -----------------------------
+  {
+    label: "Administration",
+    links: [
+      {
+        title: "User Management",
+        href: "/dashboard/admin/users",
+        icon: <Users />,
+        description: "Manage platform users",
+        roles: ["ADMIN"]
+      },
+      {
+        title: "Content Moderation",
+        href: "/dashboard/admin/moderation",
+        icon: <ShieldCheck />,
+        description: "Review content",
+        roles: ["ADMIN"]
+      },
+      {
+        title: "System Analytics",
+        href: "/dashboard/admin/analytics",
+        icon: <BarChart3 />,
+        description: "Platform metrics",
+        roles: ["ADMIN"]
+      },
+      {
+        title: "Platform Settings",
+        href: "/dashboard/admin/settings",
+        icon: <Settings />,
+        description: "System configuration",
+        roles: ["ADMIN"]
       }
     ]
   }

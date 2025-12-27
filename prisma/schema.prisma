@@ -27,6 +27,7 @@ model User {
   properties    Property[]
   sessions      Session[]
   subscriptions Subscription[]
+  notifications PropertyNotification[]
 
   @@index([email])
 }
@@ -69,31 +70,40 @@ model VerificationToken {
 }
 
 model Property {
-  id            String                   @id @default(cuid())
-  title         String
-  description   String?
-  price         Int
-  area          Int
-  bhk           Int
-  propertyType  PropertyType
-  furnishing    FurnishingStatus
-  address       String
-  latitude      Float
-  longitude     Float
-  location      Unsupported("geography")
-  status        PropertyStatus           @default(ACTIVE)
-  userId        String
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
-  user          User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images        PropertyImage[]
-  urbanSprawlData UrbanSprawlData[]
-
+  id                    String                   @id @default(cuid())
+  title                 String
+  description           String?
+  price                 Int
+  area                  Int
+  bhk                   Int
+  propertyType          PropertyType
+  furnishing            FurnishingStatus
+  address               String
+  latitude              Float
+  longitude             Float
+  location              Unsupported("geography")
+  status                PropertyStatus           @default(PENDING) // Changed default to PENDING
+  isVerified            Boolean                  @default(false) // Admin verification
+  verificationStatus    PropertyVerificationStatus @default(PENDING)
+  verificationNotes     String? // Admin notes
+  verifiedAt            DateTime?
+  verifiedBy            String? // Admin ID who verified
+  userId                String
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images                PropertyImage[]
+  urbanSprawlData       UrbanSprawlData[]
+  opinionGroup          PropertyOpinionGroup?
+  notifications         PropertyNotification[]
+  validationComments    PropertyValidationComment[]
 
   @@index([userId])
   @@index([status])
   @@index([propertyType])
   @@index([createdAt])
+  @@index([verificationStatus])
+  @@index([isVerified])
 }
 
 model PropertyImage {
@@ -140,6 +150,52 @@ model UrbanSprawlData {
   @@index([propertyId])
   @@map("urban_sprawl_data")
 }
+
+// Anonymous Opinion System (Web2 Implementation)
+// PRIVACY ENFORCEMENT: No user IDs, emails, or linkable identifiers stored
+model PropertyOpinionGroup {
+  id                String   @id @default(cuid())
+  propertyId        String   @unique
+  radiusKm          Float    @default(5.0) // Eligibility radius
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  property          Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  aggregation       OpinionAggregation?
+
+  @@index([propertyId])
+  @@map("property_opinion_groups")
+}
+
+// Stores ONLY aggregated opinion data - NEVER individual votes
+// This ensures mutual anonymity between all parties
+model OpinionAggregation {
+  id                String   @id @default(cuid())
+  opinionGroupId    String   @unique
+  totalVotes        Int      @default(0)
+  overPricedCount   Int      @default(0)
+  fairPriceCount    Int      @default(0)
+  underPricedCount  Int      @default(0)
+  lastUpdated       DateTime @updatedAt
+  opinionGroup      PropertyOpinionGroup @relation(fields: [opinionGroupId], references: [id], onDelete: Cascade)
+
+  @@index([opinionGroupId])
+  @@map("opinion_aggregations")
+}
+
+// Stores anonymous vote fingerprints to prevent double voting
+// CRITICAL: No user identifiers - only anonymized session hashes
+model OpinionVote {
+  id                String   @id @default(cuid())
+  anonymousHash     String   @unique // Prevents double voting without revealing identity
+  opinionGroupId    String
+  opinionTag        OpinionTag
+  createdAt         DateTime @default(now())
+
+  @@index([anonymousHash])
+  @@index([opinionGroupId])
+  @@map("opinion_votes")
+}
 enum UserRole {
   PUBLIC
   OWNER
@@ -164,4 +220,60 @@ enum PropertyStatus {
   ACTIVE
   SOLD
   REJECTED
+}
+
+enum PropertyVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_REVIEW
+}
+
+enum OpinionTag {
+  OVER_PRICED
+  FAIR_PRICE
+  UNDER_PRICED
+}
+
+enum ValidationType {
+  LOCATION_ACCURACY
+  PRICE_ACCURACY
+  PROPERTY_EXISTS
+  GENERAL_FEEDBACK
+}
+
+// Property notifications for nearby users
+model PropertyNotification {
+  id         String   @id @default(cuid())
+  userId     String
+  propertyId String
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([propertyId])
+  @@map("property_notifications")
+}
+
+// Anonymous validation comments from neighbors
+model PropertyValidationComment {
+  id                String         @id @default(cuid())
+  propertyId        String
+  anonymousHash     String         @unique // Prevents duplicate comments from same user
+  validationType    ValidationType
+  comment           String?
+  isLocationCorrect Boolean?
+  isPriceCorrect    Boolean?
+  suggestedPrice    Int?
+  isVisible         Boolean        @default(true) // Admin can hide inappropriate comments
+  createdAt         DateTime       @default(now())
+  property          Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([anonymousHash])
+  @@index([validationType])
+  @@map("property_validation_comments")
 }

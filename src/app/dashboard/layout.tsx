@@ -8,7 +8,6 @@ import {
 import { getCurrentUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
-
 export default async function DashboardLayout({
   children,
 }: {
@@ -26,17 +25,17 @@ export default async function DashboardLayout({
         {
           "--sidebar-width": "calc(var(--spacing) * 72)",
           "--header-height": "calc(var(--spacing) * 12)",
-          
         } as React.CSSProperties
       }
-      className="dark"
     >
       <AppSidebar variant="inset" className="rounded-md" user={user} />
-      <SidebarInset className="bg-sidebar-primary">
+      <SidebarInset className="bg-gradient-to-br from-background via-heritage-cream/30 to-background">
         <SiteHeader />
-        <div className="flex flex-1 flex-col ">
-          <div className="@container/main flex flex-1 flex-col gap-2 p-6! md:p-8! lg:p-10!">
-             {children}
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2 p-4 md:p-6 lg:p-8">
+            <div className="min-h-screen">
+              {children}
+            </div>
           </div>
         </div>
       </SidebarInset>

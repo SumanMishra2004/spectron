@@ -313,7 +313,7 @@ export async function createProperty(data: {
       INSERT INTO "Property" (
         id, title, description, price, area, bhk, 
         "propertyType", furnishing, address, latitude, longitude, location,
-        "userId", status, "createdAt", "updatedAt"
+        "userId", status, "verificationStatus", "isVerified", "createdAt", "updatedAt"
       )
       VALUES (
         gen_random_uuid()::text,
@@ -329,7 +329,9 @@ export async function createProperty(data: {
         ${data.longitude},
         ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)::geography,
         ${session.user.id},
-        'ACTIVE'::"PropertyStatus",
+        'PENDING'::"PropertyStatus",
+        'PENDING'::"PropertyVerificationStatus",
+        false,
         NOW(),
         NOW()
       )
@@ -370,6 +372,12 @@ export async function createProperty(data: {
     fetchAndStoreUrbanSprawlData(propertyId, data.latitude, data.longitude).catch((error) => {
       console.error('Error fetching urban sprawl data:', error);
       // Don't fail the property creation if urban sprawl data fetch fails
+    });
+
+    // Notify nearby neighbors asynchronously (don't wait for it)
+    notifyNearbyNeighbors(propertyId).catch((error) => {
+      console.error('Error notifying neighbors:', error);
+      // Don't fail the property creation if neighbor notification fails
     });
 
     revalidatePath('/');
@@ -431,6 +439,78 @@ async function fetchAndStoreUrbanSprawlData(
     console.log('Urban sprawl data stored successfully for property:', propertyId);
   } catch (error) {
     console.error('Error in fetchAndStoreUrbanSprawlData:', error);
+    throw error;
+  }
+}
+
+// Notify nearby neighbors about new property upload
+async function notifyNearbyNeighbors(propertyId: string) {
+  try {
+    console.log('Notifying nearby neighbors for property:', propertyId);
+
+    // Get property details
+    const property = await prisma.property.findUnique({
+      where: { id: propertyId },
+      select: {
+        id: true,
+        title: true,
+        address: true,
+        latitude: true,
+        longitude: true,
+        price: true,
+        propertyType: true,
+        userId: true,
+        user: {
+          select: { name: true }
+        }
+      }
+    });
+
+    if (!property) {
+      throw new Error('Property not found');
+    }
+
+    // Find users within 5km radius using PostGIS
+    const nearbyUsers = await prisma.$queryRaw`
+      SELECT id, name, email
+      FROM "User"
+      WHERE location IS NOT NULL
+      AND ST_DWithin(
+        location,
+        ST_SetSRID(ST_MakePoint(${property.longitude}, ${property.latitude}), 4326)::geography,
+        5000
+      )
+      AND id != ${property.userId}
+    ` as Array<{ id: string; name: string; email: string }>;
+
+    if (nearbyUsers.length === 0) {
+      console.log('No nearby users to notify for property:', propertyId);
+      return;
+    }
+
+    // Create notifications for nearby users
+    const notifications = nearbyUsers.map(user => ({
+      userId: user.id,
+      propertyId: property.id,
+      message: `New property "${property.title}" uploaded near you at ${property.address}. Help verify its accuracy and share your opinion!`
+    }));
+
+    await prisma.propertyNotification.createMany({
+      data: notifications
+    });
+
+    // Create opinion group for this property
+    await prisma.propertyOpinionGroup.create({
+      data: {
+        propertyId: property.id,
+        radiusKm: 5.0,
+        isActive: true
+      }
+    });
+
+    console.log(`Notified ${nearbyUsers.length} nearby users about property:`, propertyId);
+  } catch (error) {
+    console.error('Error in notifyNearbyNeighbors:', error);
     throw error;
   }
 }
