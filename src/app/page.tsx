@@ -1,65 +1,148 @@
-import Image from "next/image";
+import { Button } from '@/components/ui/button';
+import { PropertyCard } from '@/components/property-card';
+import { getProperties } from '@/actions/properties';
+import { Search, MapPin, Shield, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
+import { Navbar } from '@/components/navbar';
+import { getCurrentUser } from '@/lib/auth';
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+// Make this page dynamic to avoid database calls during build
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  let properties = [];
+  let user = null;
+
+  try {
+    const response = await getProperties();
+    properties = response.data || [];
+    user = await getCurrentUser();
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    // Continue with empty data rather than crashing the page
+  }
+
+  const featuredProperties = properties.slice(0, 6);
+  return ( 
+  <><Navbar user={user} />
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-amber-50 via-white to-orange-50 py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <h1 className="mb-6 text-5xl font-bold leading-tight">
+              Find Your Perfect Home in{' '}
+              <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                Kolkata
+              </span>
+            </h1>
+            <p className="mb-8 text-xl text-muted-foreground">
+              Discover apartments, houses, and plots across Kolkata. Connect with verified
+              brokers and property owners.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link href="/properties">
+                <Button size="lg" className="gap-2">
+                  <Search className="h-5 w-5" />
+                  Browse Properties
+                </Button>
+              </Link>
+              <Link href="/post-property">
+                <Button size="lg" variant="outline" className="gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  List Your Property
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Features */}
+      <section className="border-y bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                <MapPin className="h-8 w-8 text-amber-600" />
+              </div>
+              <h3 className="mb-2 font-semibold text-lg">Map-Based Search</h3>
+              <p className="text-muted-foreground">
+                Find properties by location using our interactive map
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+                <Shield className="h-8 w-8 text-emerald-600" />
+              </div>
+              <h3 className="mb-2 font-semibold text-lg">Verified Listings</h3>
+              <p className="text-muted-foreground">
+                All properties verified by our team and trusted brokers
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                <TrendingUp className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="mb-2 font-semibold text-lg">Easy Listing</h3>
+              <p className="text-muted-foreground">
+                List your property in minutes with our simple process
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Featured Properties */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-3xl">Featured Properties</h2>
+              <p className="text-muted-foreground">
+                Handpicked properties across Kolkata
+              </p>
+            </div>
+            <Link href="/properties">
+              <Button variant="outline">View All</Button>
+            </Link>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredProperties.length > 0 ? (
+              featuredProperties.map((property, index) => (
+                <PropertyCard key={index} property={property} />
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center">
+                <p className="text-muted-foreground">
+                  No properties available at the moment. Check back soon!
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="border-t bg-gradient-to-br from-amber-50 to-orange-50 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="mb-4 font-bold text-3xl">Ready to List Your Property?</h2>
+            <p className="mb-6 text-muted-foreground text-lg">
+              Join hundreds of property owners and brokers. Get verified and start
+              receiving leads today.
+            </p>
+            <Link href="/post-property">
+              <Button size="lg" className="gap-2">
+                Get Started
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div></>
   );
 }
