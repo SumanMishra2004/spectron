@@ -45,7 +45,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  
+
   /* Spectron Kolkata Brand Colors */
   --color-spectron-gold: var(--spectron-gold);
   --color-spectron-teal: var(--spectron-teal);
@@ -55,7 +55,7 @@
 
 :root {
   --radius: 0.75rem;
-  
+
   /* Kolkata Heritage Color Palette - Inspired by Victoria Memorial, Howrah Bridge, Colonial Architecture */
   --background: oklch(0.99 0.005 45); /* Warm white like marble */
   --foreground: oklch(0.2 0.02 240); /* Deep charcoal */
@@ -63,40 +63,40 @@
   --card-foreground: oklch(0.2 0.02 240);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.02 240);
-  
+
   /* Primary: Deep blue-grey inspired by Howrah Bridge steel */
   --primary: oklch(0.35 0.08 240);
   --primary-foreground: oklch(0.99 0 0);
-  
+
   /* Secondary: Warm cream inspired by colonial buildings */
   --secondary: oklch(0.95 0.02 45);
   --secondary-foreground: oklch(0.25 0.03 240);
-  
+
   --muted: oklch(0.96 0.01 45);
   --muted-foreground: oklch(0.52 0.02 240);
-  
+
   /* Accent: Terracotta inspired by Kolkata architecture */
   --accent: oklch(0.65 0.12 35);
   --accent-foreground: oklch(0.99 0 0);
-  
+
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.92 0.01 45);
   --input: oklch(0.92 0.01 45);
   --ring: oklch(0.35 0.08 240);
-  
+
   /* Spectron Brand Colors */
   --spectron-gold: oklch(0.75 0.15 65); /* Marigold gold */
   --spectron-teal: oklch(0.45 0.08 180); /* Ganges teal */
   --spectron-crimson: oklch(0.55 0.18 350); /* Sindoor red */
   --heritage-cream: oklch(0.92 0.03 45); /* Colonial cream */
-  
+
   /* Kolkata-themed charts */
   --chart-1: oklch(0.35 0.08 240); /* Primary blue */
   --chart-2: oklch(0.45 0.08 180); /* Teal */
   --chart-3: oklch(0.75 0.15 65); /* Gold */
   --chart-4: oklch(0.65 0.12 35); /* Terracotta */
   --chart-5: oklch(0.55 0.18 350); /* Crimson */
-  
+
   /* Sidebar with heritage theme */
   --sidebar: oklch(0.98 0.01 45);
   --sidebar-foreground: oklch(0.25 0.03 240);
@@ -128,13 +128,13 @@
   --border: oklch(0.20 0.02 240);
   --input: oklch(0.20 0.02 240);
   --ring: oklch(0.55 0.12 180);
-  
+
   /* Dark mode Spectron colors */
   --spectron-gold: oklch(0.70 0.12 65);
   --spectron-teal: oklch(0.55 0.12 180);
   --spectron-crimson: oklch(0.60 0.15 350);
   --heritage-cream: oklch(0.15 0.02 45);
-  
+
   /* Dark sidebar */
   --sidebar: oklch(0.12 0.01 240);
   --sidebar-foreground: oklch(0.90 0.02 45);
