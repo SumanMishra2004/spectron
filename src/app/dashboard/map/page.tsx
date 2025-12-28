@@ -28,8 +28,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-// Dynamically import Map component
-const Map = dynamic(() => import('@/components/map').then(mod => ({ default: mod.Map })), {
+// Dynamically import MapInterface component
+const MapInterface = dynamic(() => import('@/components/map-interface').then(mod => mod.MapInterface), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center bg-muted">
@@ -364,16 +364,8 @@ export default function MapExplorerPage() {
             </div>
           )}
 
-          {/* Map Placeholder */}
-          <div className="h-full w-full bg-gradient-to-br from-spectron-teal/10 to-spectron-gold/10 flex items-center justify-center">
-            <div className="text-center">
-              <MapIcon className="mx-auto mb-4 h-16 w-16 text-spectron-teal" />
-              <h3 className="text-xl font-semibold mb-2">Interactive Map</h3>
-              <p className="text-muted-foreground">
-                Map component will be loaded here with property markers
-              </p>
-            </div>
-          </div>
+          {/* Map Component */}
+          <MapInterface properties={properties} />
         </div>
       </div>
     </div>

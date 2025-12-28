@@ -9,11 +9,13 @@ import {
   Maximize, 
   IndianRupee,
   Eye,
-  Heart
+  Heart,
+  CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { PropertyValidationButton } from './property-validation-button';
 
 interface PropertyImage {
   id: string;
@@ -167,8 +169,29 @@ export function PropertyCard({ property }: PropertyCardProps) {
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex gap-2">
+        {/* Show Validate button for PENDING properties */}
+        {property.verificationStatus === 'PENDING' && (
+          <PropertyValidationButton
+            property={{
+              id: property.id,
+              title: property.title,
+              description: property.description,
+              price: property.price,
+              area: property.area,
+              bhk: property.bhk,
+              propertyType: property.propertyType,
+              furnishing: property.furnishing,
+              address: property.address,
+              images: property.images || []
+            }}
+            variant="outline"
+            size="default"
+            className="flex-1"
+          />
+        )}
+        
         <Link href={`/properties/${property.id}`} className="flex-1">
-          <Button className="w-full gap-2 bg-gradient-to-r from-spectron-gold to-spectron-teal hover:opacity-90">
+          <Button className="w-full gap-2 bg-linear-to-r from-spectron-gold to-spectron-teal hover:opacity-90">
             <Eye className="h-4 w-4" />
             View Details
           </Button>

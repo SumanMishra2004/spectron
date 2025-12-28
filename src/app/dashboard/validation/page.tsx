@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import  PropertyValidationForm  from '@/components/property-validation-form';
+
 import { getProperties } from '@/actions/properties';
 import { getCurrentUser } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,19 +18,33 @@ import {
   Clock
 } from 'lucide-react';
 import Link from 'next/link';
+import { PropertyValidationButton } from '@/components/property-validation-button';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PropertyValidationPage() {
   let nearbyProperties = [];
   let user = null;
+  let errorMessage = null;
 
   try {
-    const response = await getProperties();
-    nearbyProperties = response.data?.slice(0, 6) || []; // Mock nearby properties
     user = await getCurrentUser();
+    
+    if (!user) {
+      errorMessage = 'Please sign in to validate properties';
+    } else if (!user.latitude || !user.longitude) {
+      errorMessage = 'Please update your location to see nearby properties';
+    } else {
+      // Fetch properties within 5km radius of user's location
+      const response = await getProperties({
+        radius: { lat: user.latitude, lng: user.longitude, km: 5 },
+        status: ['PENDING', 'ACTIVE'] // Show both pending and active properties
+      });
+      nearbyProperties = response.data || [];
+    }
   } catch (error) {
     console.error('Error fetching data:', error);
+    errorMessage = 'Failed to load properties';
   }
 
   // Mock validation stats
@@ -184,7 +198,25 @@ export default async function PropertyValidationPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {nearbyProperties.length > 0 ? (
+          {errorMessage ? (
+            <div className="text-center py-12">
+              <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
+              <h3 className="mb-2 text-lg font-semibold">{errorMessage}</h3>
+              <p className="text-muted-foreground mb-4">
+                {errorMessage.includes('location') 
+                  ? 'Update your location to discover properties nearby and start validating.'
+                  : 'Please try again or contact support if the issue persists.'}
+              </p>
+              {errorMessage.includes('location') && (
+                <Link href="/dashboard/location">
+                  <Button variant="default" className="gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Update Location
+                  </Button>
+                </Link>
+              )}
+            </div>
+          ) : nearbyProperties.length > 0 ? (
             <div className="space-y-4">
               {nearbyProperties.map((property) => (
                 <div key={property.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
@@ -210,19 +242,31 @@ export default async function PropertyValidationPage() {
                         >
                           {property.verificationStatus === 'APPROVED' ? 'Verified' : 'Pending'}
                         </Badge>
+                        {property.distance_km && (
+                          <Badge variant="outline" className="text-xs text-spectron-teal">
+                            {property.distance_km.toFixed(1)} km away
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="gap-2 hover:bg-spectron-teal/10 hover:text-spectron-teal hover:border-spectron-teal"
-                    >
-                      <Shield className="h-4 w-4" />
-                      Validate
-                    </Button>
+                    <PropertyValidationButton
+                      property={{
+                        id: property.id,
+                        title: property.title,
+                        description: property.description,
+                        price: property.price,
+                        area: property.area,
+                        bhk: property.bhk,
+                        propertyType: property.propertyType,
+                        furnishing: property.furnishing,
+                        address: property.address,
+                        images: property.images || []
+                      }}
+                      size="sm"
+                    />
                   </div>
                 </div>
               ))}
@@ -232,12 +276,14 @@ export default async function PropertyValidationPage() {
               <MapPin className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
               <h3 className="mb-2 text-lg font-semibold">No Properties Found</h3>
               <p className="text-muted-foreground mb-4">
-                No properties found in your 5km radius. Enable location or check back later.
+                No properties found in your 5km radius. Check back later when new properties are listed nearby.
               </p>
-              <Button variant="outline" className="gap-2">
-                <MapPin className="h-4 w-4" />
-                Enable Location
-              </Button>
+              <Link href="/properties">
+                <Button variant="outline" className="gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Browse All Properties
+                </Button>
+              </Link>
             </div>
           )}
         </CardContent>

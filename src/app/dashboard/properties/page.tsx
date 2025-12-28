@@ -1,21 +1,13 @@
-import { Suspense } from 'react';
-import { PropertyCard } from '@/components/property-card';
-import { PropertyFilters } from '@/components/property-filters';
-import { PropertiesPageSkeleton } from '@/components/properties-skeleton';
 import { getProperties } from '@/actions/properties';
 import { getCurrentUser } from '@/lib/auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardPropertiesList } from '@/components/dashboard-properties-list';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   Building2, 
   MapPin, 
-  Filter, 
-  Search,
   TrendingUp,
-  Sparkles,
-  Grid3X3,
-  List,
   PlusCircle,
   Eye
 } from 'lucide-react';
@@ -121,92 +113,10 @@ export default async function DashboardPropertiesPage() {
       </div>
 
       {/* Filters & Results */}
-      <div className="grid gap-8 lg:grid-cols-4">
-        {/* Filters Sidebar */}
-        <div className="lg:col-span-1">
-          <Card className="spectron-card sticky top-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-spectron-teal" />
-                Filters
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<div>Loading filters...</div>}>
-                <PropertyFilters 
-                  onFiltersChange={(filters) => {
-                    console.log('Filters changed:', filters);
-                  }}
-                />
-              </Suspense>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Properties Grid */}
-        <div className="lg:col-span-3">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl font-semibold">
-                {properties.length} Properties Found
-              </h2>
-              <Badge variant="outline" className="gap-1">
-                <Sparkles className="h-3 w-3" />
-                All Verified
-              </Badge>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Grid3X3 className="h-4 w-4" />
-                Grid
-              </Button>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <List className="h-4 w-4" />
-                List
-              </Button>
-            </div>
-          </div>
-
-          <Suspense fallback={<PropertiesPageSkeleton />}>
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {properties.length > 0 ? (
-                properties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))
-              ) : (
-                <Card className="col-span-full border-2 border-dashed border-spectron-teal/30 spectron-card">
-                  <CardContent className="py-16 text-center">
-                    <Search className="mx-auto mb-4 h-16 w-16 text-spectron-teal/50" />
-                    <h3 className="mb-2 text-xl font-semibold">No Properties Found</h3>
-                    <p className="mb-6 text-muted-foreground">
-                      Try adjusting your filters or be the first to list a property in this area.
-                    </p>
-                    {(user?.role === 'OWNER' || user?.role === 'BROKER') && (
-                      <Link href="/dashboard/properties/new">
-                        <Button className="gap-2 bg-gradient-to-r from-spectron-gold to-spectron-teal">
-                          <Building2 className="h-4 w-4" />
-                          List Your Property
-                        </Button>
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </Suspense>
-
-          {/* Load More */}
-          {properties.length > 0 && (
-            <div className="mt-12 text-center">
-              <Button variant="outline" size="lg" className="gap-2 hover:bg-spectron-teal/10 hover:text-spectron-teal hover:border-spectron-teal">
-                Load More Properties
-                <TrendingUp className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+      <DashboardPropertiesList 
+        initialProperties={properties} 
+        userRole={user?.role}
+      />
     </div>
   );
 }

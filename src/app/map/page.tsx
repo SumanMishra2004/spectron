@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { MapInterface } from '@/components/map-interface';
 
 
+
 export const dynamic = 'force-dynamic';
 
 export default async function MapPage() {

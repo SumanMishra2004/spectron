@@ -9,14 +9,14 @@ import {
   BarChart3, 
   Building2, 
   User, 
-  LogIn, 
-  LogOut,
+  LogIn,
   Menu,
   X,
   Satellite
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { signIn } from 'next-auth/react';
 
 interface NavbarProps {
   user?: any;
@@ -77,17 +77,10 @@ export function Navbar({ user }: NavbarProps) {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link href="/auth/login">
-                  <Button variant="outline" size="sm">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/auth/register">
-                  <Button size="sm" className="bg-gradient-to-r from-spectron-gold to-spectron-teal">
-                    Sign Up
-                  </Button>
-                </Link>
+                <Button onClick={() => signIn('google', { callbackUrl: '/' })} variant="outline" size="sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  SignUp
+                </Button>
               </div>
             )}
 

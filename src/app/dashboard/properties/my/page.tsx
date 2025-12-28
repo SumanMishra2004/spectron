@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import { getUserProperties } from '@/actions/dashboard';
-import { getMyProperties } from '@/actions/properties';
 import { getCurrentUser } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,7 +38,28 @@ async function MyPropertiesContent() {
     redirect('/dashboard');
   }
 
-  const properties = await getUserProperties();
+  const propertiesResponse = await getUserProperties();
+  
+  if (!propertiesResponse.success || !propertiesResponse.data) {
+    return (
+      <Card className="border-0 shadow-lg">
+        <CardContent className="p-12 text-center">
+          <div className="rounded-full bg-red-100 p-6 w-24 h-24 mx-auto mb-6">
+            <Building2 className="h-12 w-12 text-red-600 mx-auto" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Error Loading Properties</h3>
+          <p className="text-muted-foreground mb-6">
+            {propertiesResponse.error || 'Failed to load your properties'}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  const properties = propertiesResponse.data;
   
   const statusColors = {
     ACTIVE: 'bg-green-100 text-green-700 border-green-200',
@@ -145,18 +165,13 @@ async function MyPropertiesContent() {
                       <Badge className={statusColors[property.status as keyof typeof statusColors]}>
                         {property.status}
                       </Badge>
-                      <Badge 
+                      {/* <Badge 
                         variant="outline" 
                         className={verificationColors[property.verificationStatus as keyof typeof verificationColors]}
                       >
                         {property.isVerified ? 'Verified' : property.verificationStatus}
-                      </Badge>
-                      {property.isFeatured && (
-                        <Badge className="bg-spectron-gold/20 text-spectron-gold border-spectron-gold/30">
-                          <Star className="h-3 w-3 mr-1" />
-                          Featured
-                        </Badge>
-                      )}
+                      </Badge> */}
+                     
                     </div>
 
                     {/* Price and Stats */}
@@ -171,7 +186,7 @@ async function MyPropertiesContent() {
                       </div>
                       
                       <div className="flex items-center gap-6 text-sm">
-                        <div className="text-center">
+                        {/* <div className="text-center">
                           <div className="flex items-center gap-1 text-muted-foreground">
                             <Eye className="h-4 w-4" />
                             <span>Views</span>
@@ -183,8 +198,8 @@ async function MyPropertiesContent() {
                             <MessageSquare className="h-4 w-4" />
                             <span>Inquiries</span>
                           </div>
-                          <p className="font-semibold">{property.notificationCount || 0}</p>
-                        </div>
+                          <p className="font-semibold">{property._count?.notifications || 0}</p>
+                        </div> */}
                         <div className="text-center">
                           <div className="flex items-center gap-1 text-muted-foreground">
                             <Calendar className="h-4 w-4" />

@@ -11,26 +11,29 @@ import {
   TrendingUp, 
   Users, 
   Bell,
-  Eye,
   MapPin,
   PlusCircle,
   BarChart3,
   Wallet,
   Star,
   Activity,
-  Calendar,
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const dynamic = 'force-dynamic';
 
 async function DashboardStats() {
-  const stats = await getDashboardStats();
+  const statsResponse = await getDashboardStats();
   const user = await getCurrentUser();
+  
+  if (!statsResponse.success || !statsResponse.data) {
+    return <div>Error loading stats</div>;
+  }
+  
+  const stats = statsResponse.data;
   
   const statCards = [
     {
@@ -119,7 +122,13 @@ async function DashboardStats() {
 }
 
 async function RecentActivity() {
-  const activities = await getRecentActivity(5);
+  const activitiesResponse = await getRecentActivity(5);
+  
+  if (!activitiesResponse.success || !activitiesResponse.data) {
+    return <div>Error loading activity</div>;
+  }
+  
+  const activities = activitiesResponse.data;
   
   return (
     <Card className="border-0 shadow-lg">
@@ -138,7 +147,7 @@ async function RecentActivity() {
               <p>No recent activity</p>
             </div>
           ) : (
-            activities.map((activity, index) => (
+            activities.map((activity: any, index: number) => (
               <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-heritage-cream/30 hover:bg-heritage-cream/50 transition-colors">
                 <div className="rounded-full bg-spectron-teal/10 p-2">
                   <Building2 className="h-4 w-4 text-spectron-teal" />
@@ -173,7 +182,13 @@ async function UserProperties() {
     return null;
   }
 
-  const properties = await getUserProperties();
+  const propertiesResponse = await getUserProperties();
+  
+  if (!propertiesResponse.success || !propertiesResponse.data) {
+    return <div>Error loading properties</div>;
+  }
+  
+  const properties = propertiesResponse.data;
   
   return (
     <Card className="border-0 shadow-lg">
@@ -199,7 +214,7 @@ async function UserProperties() {
             </div>
           ) : (
             <>
-              {properties.slice(0, 3).map((property) => (
+              {properties.slice(0, 3).map((property: any) => (
                 <div key={property.id} className="flex items-center gap-3 p-3 rounded-lg bg-heritage-cream/30 hover:bg-heritage-cream/50 transition-colors">
                   <div className="w-12 h-12 rounded-lg bg-spectron-teal/10 flex items-center justify-center">
                     <Building2 className="h-6 w-6 text-spectron-teal" />

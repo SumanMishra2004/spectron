@@ -5,6 +5,7 @@ import { Building2 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
+import { RoleSwitcher } from "@/components/role-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -31,15 +32,18 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="/dashboard">
-                <Building2 className="!size-5" />
+                <Building2 className="size-5!" />
                 <span className="text-base font-semibold">PropertyHub</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <div className="mt-4 px-2">
+          <RoleSwitcher currentRole={user.role} />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain sections={sidebarSections} />

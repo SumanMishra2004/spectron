@@ -2,7 +2,17 @@
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
-import { UserRole } from '@prisma/client';
+
+interface Activity {
+  id: string;
+  action: string;
+  property: string;
+  time: Date | string;
+  type: string;
+  icon: string;
+  message?: string;
+  createdAt?: Date;
+}
 
 export async function getDashboardStats() {
   try {
@@ -33,7 +43,7 @@ export async function getDashboardStats() {
     if (user.role === 'OWNER' || user.role === 'BROKER') {
       stats.userProperties = await prisma.property.count({
         where: {
-          ownerId: user.id,
+          userId: user.id,
           status: { in: ['ACTIVE', 'PENDING'] }
         }
       });
@@ -43,7 +53,7 @@ export async function getDashboardStats() {
     stats.notifications = await prisma.propertyNotification.count({
       where: {
         userId: user.id,
-        read: false
+        isRead: false
       }
     });
 
@@ -65,26 +75,18 @@ export async function getDashboardStats() {
 
     // Role-specific stats
     if (user.role === 'BROKER') {
-      // Get leads count (using property inquiries as leads)
+      // Get leads count (using property count as placeholder)
       stats.leads = await prisma.property.count({
         where: {
-          ownerId: user.id,
-          // Add lead tracking logic here when implemented
+          userId: user.id,
         }
       });
 
       // Calculate commission earned (placeholder - implement based on your commission model)
       stats.commissionEarned = 420000; // This should be calculated from actual transactions
 
-      // Calculate conversion rate (placeholder)
-      const totalViews = await prisma.property.aggregate({
-        where: { ownerId: user.id },
-        _sum: { views: true }
-      });
-      
-      if (totalViews._sum.views && totalViews._sum.views > 0) {
-        stats.conversionRate = (stats.leads / totalViews._sum.views) * 100;
-      }
+      // Calculate conversion rate (placeholder - set to 0 since views field doesn't exist)
+      stats.conversionRate = 0;
     }
 
     return { success: true, data: stats };
@@ -101,13 +103,13 @@ export async function getRecentActivity(limit: number = 10) {
       throw new Error('User not authenticated');
     }
 
-    const activities = [];
+    const activities: Activity[] = [];
 
     // Get recent property updates for owners/brokers
     if (user.role === 'OWNER' || user.role === 'BROKER') {
       const recentProperties = await prisma.property.findMany({
         where: {
-          ownerId: user.id,
+          userId: user.id,
         },
         orderBy: {
           updatedAt: 'desc'
@@ -149,7 +151,7 @@ export async function getRecentActivity(limit: number = 10) {
         id: true,
         message: true,
         createdAt: true,
-        type: true,
+        propertyId: true,
         property: {
           select: {
             title: true
@@ -164,18 +166,23 @@ export async function getRecentActivity(limit: number = 10) {
         action: notification.message,
         property: notification.property?.title || 'System notification',
         time: notification.createdAt,
-        type: notification.type.toLowerCase(),
+        type: 'notification',
         icon: 'Bell'
       });
     });
 
     // Sort by time and limit
     const sortedActivities = activities
-      .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+      .sort((a, b) => {
+        const timeA = a.time instanceof Date ? a.time : new Date(a.time);
+        const timeB = b.time instanceof Date ? b.time : new Date(b.time);
+        return timeB.getTime() - timeA.getTime();
+      })
       .slice(0, limit)
       .map(activity => ({
         ...activity,
-        time: formatTimeAgo(activity.time)
+        message: activity.action,
+        createdAt: activity.time instanceof Date ? activity.time : new Date(activity.time)
       }));
 
     return { success: true, data: sortedActivities };
@@ -196,7 +203,7 @@ export async function getUserProperties(userId?: string) {
 
     const properties = await prisma.property.findMany({
       where: {
-        ownerId: targetUserId,
+        userId: targetUserId,
       },
       include: {
         images: {
@@ -230,11 +237,10 @@ export async function getPropertyInquiries() {
       throw new Error('User not authenticated');
     }
 
-    // Get inquiries for user's properties
+    // Get all notifications for user's properties (as inquiries)
     const inquiries = await prisma.propertyNotification.findMany({
       where: {
         userId: user.id,
-        type: 'INQUIRY'
       },
       include: {
         property: {

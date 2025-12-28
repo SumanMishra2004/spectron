@@ -625,11 +625,32 @@ export async function getNearbyProperties(
   }
 }
 
-export async function updateUserLocation(lat: number, lng: number, address?: string) {
+export async function updateUserLocation(lat: number, lng: number) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' };
+    }
+
+    // Reverse geocode to get address (server-side to avoid CORS)
+    let address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        {
+          headers: {
+            'User-Agent': 'PropertyPlatform/1.0'
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        address = data.display_name || address;
+      }
+    } catch (geocodeError) {
+      console.warn('Reverse geocoding failed, using coordinates:', geocodeError);
+      // Continue with coordinates as address
     }
 
     await prisma.$executeRaw`
@@ -638,12 +659,12 @@ export async function updateUserLocation(lat: number, lng: number, address?: str
         latitude = ${lat},
         longitude = ${lng},
         location = ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
-        address = COALESCE(${address}, address),
+        address = ${address},
         "updatedAt" = NOW()
       WHERE id = ${session.user.id}
     `;
 
-    return { success: true };
+    return { success: true, address };
   } catch (error) {
     console.error('Error updating user location:', error);
     return { success: false, error: 'Failed to update location' };

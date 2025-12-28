@@ -1,7 +1,12 @@
 'use server';
 
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "@/lib/auth-config";
+import { redirect } from "next/navigation";
 
-// These are just exports for client components
-// The actual auth is handled by NextAuth
-export { signIn as signInWithGoogle, signOut as signOutAction };
+export async function signInWithGoogle() {
+  await signIn('google', { redirectTo: '/' });
+}
+
+export async function signOutAction() {
+  await signIn('google', { redirectTo: '/auth/signout' });
+}

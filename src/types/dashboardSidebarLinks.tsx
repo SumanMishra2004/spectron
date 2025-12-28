@@ -16,7 +16,9 @@ import {
   FileText,
   BarChart3,
   Shield,
-  CheckCircle
+  CheckCircle,
+  Clock,
+  MapPin
 } from "lucide-react";
 import { JSX } from "react";
 
@@ -48,6 +50,14 @@ export const dashboardSidebarLinks: SidebarSection[] = [
         icon: <LayoutDashboardIcon />,
         description: "Quick overview of activity and stats",
         roles: ["PUBLIC", "OWNER", "BROKER", "ADMIN"]
+      },
+      {
+        title: "Admin Dashboard",
+        href: "/dashboard/admin",
+        icon: <Shield />,
+        description: "Admin control panel",
+        variant: "primary",
+        roles: ["ADMIN"]
       },
       {
         title: "Market Snapshot",
@@ -166,12 +176,29 @@ export const dashboardSidebarLinks: SidebarSection[] = [
         icon: <Shield />,
         description: "Help verify nearby properties",
         roles: ["PUBLIC", "OWNER", "BROKER"]
+      }
+    ]
+  },
+
+  // -----------------------------
+  // ADMIN VERIFICATION
+  // -----------------------------
+  {
+    label: "Admin Verification",
+    links: [
+      {
+        title: "Verification Queue",
+        href: "/dashboard/admin/queue",
+        icon: <CheckCircle />,
+        description: "Review pending properties",
+        variant: "primary",
+        roles: ["ADMIN"]
       },
       {
-        title: "Admin Verification",
-        href: "/dashboard/admin/verify",
-        icon: <CheckCircle />,
-        description: "Approve/reject properties",
+        title: "Abuse Detection",
+        href: "/dashboard/admin/abuse",
+        icon: <ShieldCheck />,
+        description: "Flag suspicious activity",
         roles: ["ADMIN"]
       }
     ]
@@ -183,6 +210,13 @@ export const dashboardSidebarLinks: SidebarSection[] = [
   {
     label: "Account",
     links: [
+      {
+        title: "Update Location",
+        href: "/dashboard/location",
+        icon: <MapPin />,
+        description: "Set your current location",
+        roles: ["PUBLIC", "OWNER", "BROKER", "ADMIN"]
+      },
       {
         title: "Profile",
         href: "/dashboard/profile",
